@@ -9,6 +9,20 @@ import AccountStore from './account';
 import ContractStore from './contract';
 import UserProfileStore from './user';
 
+const signerDecoder = ([
+  address,
+  id,
+  name,
+  lastname,
+  retractedSignature,
+]) => ({
+  address,
+  name,
+  lastname,
+  id: id.toNumber(),
+  retractedSignature: retractedSignature.toNumber(),
+});
+
 class PetitionStore {
   @observable account = AccountStore;
 
@@ -22,6 +36,8 @@ class PetitionStore {
 
   @observable retractedCount: -1;
 
+  @observable signatures = [];
+
   @computed get isOnline() {
     return this.contract.isOnline && this.account.isOnline;
   }
@@ -30,7 +46,7 @@ class PetitionStore {
     reaction(() => this.contract.isOnline, async () => {
       if (this.contract.isOnline) {
         await this.refreshPetition();
-        await this.refreshSignaturesCount();
+        await this.refreshSignatures();
       }
     });
   }
@@ -44,11 +60,26 @@ class PetitionStore {
     this.retractedCount = (await this.getRetractedCount()).toNumber();
   }
 
+  @action refreshSignatures = async () => {
+    await this.refreshSignaturesCount();
+    this.signatures = (await Promise.all(
+      (new Array(this.signaturesCount))
+        .fill(0)
+        .map(async (_, index) => this.getSigner(
+          await this.getSignatureIndexByIdentificationId(index),
+        )),
+    )).map(signerDecoder);
+  }
+
   @action getPetitionName = async () => this.contract.executeCommand('getAddressedTo')
 
   @action getSignatureCount = async () => this.contract.executeCommand('getSignaturesNumber')
 
   @action getRetractedCount = async () => this.contract.executeCommand('getRetractedSignaturesIndex')
+
+  @action getSigner = async signer => this.contract.executeCommand('getSigner', signer)
+
+  @action getSignatureIndexByIdentificationId = async id => this.contract.executeCommand('getSignatureIndexByIdentificationId', id)
 }
 
 const Store = new PetitionStore();
