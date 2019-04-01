@@ -26,6 +26,7 @@ const Petition = () => {
     signatures,
     hasSigned,
     signPetition,
+    retractSignature,
   } = useObservable(PetitionStore);
   const {
     Snackbar, openSnackbar, onSuccess, onError,
@@ -36,7 +37,7 @@ const Petition = () => {
     if (!hasSigned) {
       p = signPetition();
     } else {
-      p = Promise.reject(new Error('NOT IMPLEMENTED'));
+      p = retractSignature();
     }
     p.then(onSuccess).catch(onError);
   };

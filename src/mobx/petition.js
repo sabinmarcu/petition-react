@@ -54,6 +54,7 @@ class PetitionStore {
         await this.refreshPetition();
         await this.refreshSignatures();
         this.subscribeToPetitionSign(this.reactToSignatureChange);
+        this.subscribeToSignatureRetracted(this.reactToSignatureChange);
       }
     });
   }
@@ -127,6 +128,8 @@ class PetitionStore {
 
   @action addSignerAndSign = async (id, name, lastname) => this.contract.executeCommand('addSignerAndSign', id, name, lastname)
 
+  @action retractSign = async () => this.contract.executeCommand('retractSign')
+
   @action subscribeToPetitionSign = (
     successHandler,
     errorHandler,
@@ -135,6 +138,15 @@ class PetitionStore {
     successHandler,
     errorHandler,
   )
+
+  @action subscribeToSignatureRetracted = (
+    successHandler,
+    errorHandler,
+  ) => this.contract.subscribeToEvent(
+    'SignatureRetracted',
+    successHandler,
+    errorHandler,
+  );
 }
 
 const Store = new PetitionStore();
