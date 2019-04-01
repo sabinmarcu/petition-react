@@ -1,0 +1,28 @@
+.layout {
+  flex: 1;
+  padding-top: 50px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.layout .wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-flow: row wrap;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+.layout .wrapper .fullWidth {
+  flex: 0 0 100%;
+  margin-bottom: 20px;
+}
+.layout .wrapper .sidebar {
+  max-width: 300px;
+  flex: 1;
+}
+.layout .wrapper .content {
+  min-width: 500px;
+  padding-left: 20px;
+  box-sizing: border-box;
+  flex: 3;
+}

@@ -1,0 +1,4 @@
+.tableWrapper {
+  overflow: auto;
+  max-height: 300px;
+}
