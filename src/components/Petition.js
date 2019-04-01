@@ -11,8 +11,11 @@ import {
   TableHead,
   TableBody,
   TableCell,
+  CardActions,
+  Button,
 } from '@material-ui/core';
 
+import useSnackbar from '../hooks/transactionSnackbar';
 import PetitionStore from '../mobx/petition';
 import style from './Petition.module.css';
 
@@ -21,7 +24,22 @@ const Petition = () => {
     signaturesCount,
     retractedCount,
     signatures,
+    hasSigned,
+    signPetition,
   } = useObservable(PetitionStore);
+  const {
+    Snackbar, openSnackbar, onSuccess, onError,
+  } = useSnackbar();
+  const signPetitionAction = async () => {
+    openSnackbar();
+    let p;
+    if (!hasSigned) {
+      p = signPetition();
+    } else {
+      p = Promise.reject(new Error('NOT IMPLEMENTED'));
+    }
+    p.then(onSuccess).catch(onError);
+  };
   return (
     <>
       <Card>
@@ -66,13 +84,26 @@ const Petition = () => {
                       ))}
                     </TableBody>
                   </Table>
+                  <Typography variant="h6">
+                    {
+                    hasSigned
+                      ? 'You have signed this petition'
+                      : 'You have not signed this petition'
+                  }
+                  </Typography>
                 </section>
               </>
             )
             : <Typography variant="h6">There are no signatures yet!</Typography>
           }
         </CardContent>
+        <CardActions>
+          <Button color="primary" onClick={signPetitionAction}>
+            {!hasSigned ? 'Sign Petition' : 'Revoke Petition'}
+          </Button>
+        </CardActions>
       </Card>
+      <Snackbar />
     </>
   );
 };

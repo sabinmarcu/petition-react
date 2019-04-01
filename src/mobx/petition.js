@@ -38,8 +38,14 @@ class PetitionStore {
 
   @observable signatures = [];
 
+  @observable identificationId = null;
+
   @computed get isOnline() {
     return this.contract.isOnline && this.account.isOnline;
+  }
+
+  @computed get hasSigned() {
+    return this.identificationId != null;
   }
 
   constructor() {
@@ -47,6 +53,7 @@ class PetitionStore {
       if (this.contract.isOnline) {
         await this.refreshPetition();
         await this.refreshSignatures();
+        this.subscribeToPetitionSign(this.reactToSignatureChange);
       }
     });
   }
@@ -69,6 +76,43 @@ class PetitionStore {
           await this.getSignatureIndexByIdentificationId(index),
         )),
     )).map(signerDecoder);
+    await this.tryAndGetIdentificationId();
+  }
+
+  @action signPetition = async () => {
+    if (this.identificationId) {
+      throw new Error('You have already signed this petition!');
+    }
+    const signatureCount = await this.getSignatureCount();
+    return this.addSignerAndSign(
+      signatureCount,
+      this.userProfile.name,
+      this.userProfile.lastname,
+    );
+  }
+
+  @action tryAndGetIdentificationId = async () => {
+    if (this.signatures.length > 0) {
+      const signer = this.signatures.find(
+        ({ address }) => address === this.account.primaryAccount,
+      );
+      if (signer) {
+        this.identificationId = signer.id;
+        this.userProfile.name = signer.name;
+        this.userProfile.lastname = signer.lastname;
+      } else {
+        this.identificationId = null;
+        this.userProfile.name = null;
+        this.userProfile.lastname = null;
+      }
+    }
+  }
+
+  @action retractSignature = async () => {
+    if (!this.identificationId) {
+      throw new Error('You must have signed the petition to retract it!');
+    }
+    return this.retractSign();
   }
 
   @action getPetitionName = async () => this.contract.executeCommand('getAddressedTo')
@@ -80,6 +124,17 @@ class PetitionStore {
   @action getSigner = async signer => this.contract.executeCommand('getSigner', signer)
 
   @action getSignatureIndexByIdentificationId = async id => this.contract.executeCommand('getSignatureIndexByIdentificationId', id)
+
+  @action addSignerAndSign = async (id, name, lastname) => this.contract.executeCommand('addSignerAndSign', id, name, lastname)
+
+  @action subscribeToPetitionSign = (
+    successHandler,
+    errorHandler,
+  ) => this.contract.subscribeToEvent(
+    'PetitionSigned',
+    successHandler,
+    errorHandler,
+  )
 }
 
 const Store = new PetitionStore();
