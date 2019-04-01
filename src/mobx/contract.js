@@ -5,7 +5,7 @@ import abi from '../data/abi.json';
 
 import { wrapCall, wrapSubscription } from './utils';
 
-const defaultAddress = '';
+const defaultAddress = '0x811cf6b2c70a61C306EAa787Ef5214c5685f58f2';
 class ContractStore {
   @observable contract = null;
 

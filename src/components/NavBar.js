@@ -8,11 +8,13 @@ import {
 } from '@material-ui/core';
 
 import AccountStore from '../mobx/account';
+import PetitionStore from '../mobx/petition';
 import style from './NavBar.module.css';
 
 const NavBar = () => {
-  const title = 'DApps with React';
   const { isOnline, primaryAccount } = useObservable(AccountStore);
+  const { name } = useObservable(PetitionStore);
+  const title = name ? `Addressed To: ${name}` : 'DApps with React';
   return (
     <AppBar position="static" className={style.navBar}>
       <Toolbar>
