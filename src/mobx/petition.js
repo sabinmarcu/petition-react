@@ -2,6 +2,7 @@ import {
   observable,
   action,
   reaction,
+  computed,
 } from 'mobx';
 
 import AccountStore from './account';
@@ -17,10 +18,19 @@ class PetitionStore {
 
   @observable name = null;
 
+  @observable signaturesCount: -1;
+
+  @observable retractedCount: -1;
+
+  @computed get isOnline() {
+    return this.contract.isOnline && this.account.isOnline;
+  }
+
   constructor() {
     reaction(() => this.contract.isOnline, async () => {
       if (this.contract.isOnline) {
-        this.refreshPetition();
+        await this.refreshPetition();
+        await this.refreshSignaturesCount();
       }
     });
   }
@@ -29,7 +39,16 @@ class PetitionStore {
     this.name = await this.getPetitionName();
   }
 
+  @action refreshSignaturesCount = async () => {
+    this.signaturesCount = (await this.getSignatureCount()).toNumber();
+    this.retractedCount = (await this.getRetractedCount()).toNumber();
+  }
+
   @action getPetitionName = async () => this.contract.executeCommand('getAddressedTo')
+
+  @action getSignatureCount = async () => this.contract.executeCommand('getSignaturesNumber')
+
+  @action getRetractedCount = async () => this.contract.executeCommand('getRetractedSignaturesIndex')
 }
 
 const Store = new PetitionStore();

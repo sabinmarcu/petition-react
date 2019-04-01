@@ -10,11 +10,12 @@ import {
 } from './components/Layout';
 import NavBar from './components/NavBar';
 import UserProfile from './components/UserProfile';
+import Petition from './components/Petition';
 
-import ContractStore from './mobx/contract';
+import PetitionStore from './mobx/petition';
 
 const AppRoot = () => {
-  const { isOnline, address } = useObservable(ContractStore);
+  const { isOnline } = useObservable(PetitionStore);
   return (
     <>
       <NavBar />
@@ -24,7 +25,7 @@ const AppRoot = () => {
             <UserProfile />
           </Sidebar>
           <Content>
-            {isOnline ? address : 'Not connected to contract'}
+            {isOnline ? <Petition /> : 'Not connected to contract'}
           </Content>
         </>
       </Layout>
