@@ -1,5 +1,5 @@
 import React from 'react';
-import { observer } from 'mobx-react-lite';
+import { observer, useObservable } from 'mobx-react-lite';
 
 import './index.css';
 
@@ -11,18 +11,25 @@ import {
 import NavBar from './components/NavBar';
 import UserProfile from './components/UserProfile';
 
-const AppRoot = () => (
-  <>
-    <NavBar />
-    <Layout>
-      <>
-        <Sidebar>
-          <UserProfile />
-        </Sidebar>
-        <Content />
-      </>
-    </Layout>
-  </>
-);
+import ContractStore from './mobx/contract';
+
+const AppRoot = () => {
+  const { isOnline, address } = useObservable(ContractStore);
+  return (
+    <>
+      <NavBar />
+      <Layout>
+        <>
+          <Sidebar>
+            <UserProfile />
+          </Sidebar>
+          <Content>
+            {isOnline ? address : 'Not connected to contract'}
+          </Content>
+        </>
+      </Layout>
+    </>
+  );
+};
 
 export default observer(AppRoot);
